@@ -42,18 +42,23 @@ class Dot:
 class Ship:
     near_dots = []
 
-    def __init__(self, dots, hp):
-        self.dots = dots
+    def __init__(self, forward_dot, length, hp, dots=None):
+        self.forward_dot = forward_dot
+        self.length = length
         self.hp = hp
         self.direction = randint(1, 2)
+        self.dots = [forward_dot] if dots is None else dots
 
-    def get_near_dots(self):
-        """ Возвращает список точек вокруг корабля """
-        for ship_dot in self.dots:
-            ship_dot.get_near_dots()
-            for near_dot in ship_dot.near_dots:
-                if near_dot not in self.near_dots:
-                    self.near_dots.append(near_dot)
+    def get_dots(self):
+        pass
+
+    # def get_near_dots(self):
+    #     """ Возвращает список точек вокруг корабля """
+    #     for ship_dot in self.dots:
+    #         ship_dot.get_near_dots()
+    #         for near_dot in ship_dot.near_dots:
+    #             if near_dot not in self.near_dots:
+    #                 self.near_dots.append(near_dot)
 
 
 class Board:
@@ -125,17 +130,17 @@ class Game:
         random_board = Board([[Dot(x + 1, y + 1) for x in range(6)] for y in range(6)])
 
         for i in range(4):
-            ship1 = Ship([Dot(randint(1, 6), randint(1, 6))], 1)
+            ship1 = Ship([Dot(randint(1, 6), randint(1, 6))], 1, 1)
             random_board.add_ship(ship1)
 
-        ship2_1 = Ship([Dot(x + 1, 1) for x in range(2)], 2)
-        ship2_2 = Ship([Dot(x + 1, 1) for x in range(2)], 2)
-        #
+        # ship2_1 = Ship([Dot(x + 1, 1) for x in range(2)], 2, 2)
+        # ship2_2 = Ship([Dot(x + 1, 1) for x in range(2)], 2, 2)
+
         # ship3 = Ship([Dot(5, y + 2) for y in range(3)], 3)
-        random_board.print_board()
-        #
-        random_board.add_ship(ship2_1)
-        random_board.add_ship(ship2_2)
+        # random_board.print_board()
+
+        # random_board.add_ship(ship2_1)
+        # random_board.add_ship(ship2_2)
         # random_board.add_ship(ship3)
         # random_board.print_board()
 
