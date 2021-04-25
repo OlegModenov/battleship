@@ -1,5 +1,16 @@
+import random
+
+
+# class BoardOutException(Exception):
+#     def __init__(self, message):
+#         self.message = message
+#
+#     def __str__(self):
+#         return f'BoardOutException, {self.message}'
+
+
 class Dot:
-    def __init__(self, x, y, state='O'):
+    def __init__(self, x, y, state=' '):
         self.x = x
         self.y = y
         self.state = state
@@ -15,26 +26,51 @@ class Dot:
 
 
 class Ship:
-    dots = []
-
-    def __init__(self, length, front_dot, back_dot, hp):
-        self.length = length
-        self.front_dot = front_dot
-        self.back_dot = back_dot
+    def __init__(self, dots, hp):
+        self.dots = dots
         self.hp = hp
-
-    def get_dots(self):
-        for i in range(self.length):
-            self.dots.append(i)
-        return self.dots
 
 
 class Board:
-    def __init__(self, dots, ships=(), hid=False, living_ships=7):
+    def __init__(self, dots, ships=None, hid=False, living_ships=7):
         self.dots = dots
-        self.ships = ships
+        self.ships = [] if ships is None else ships
         self.hid = hid
         self.living_ships = living_ships
+
+    def add_ship(self, ship):
+        """
+        Добавляет объект класса Ship в список Board.ships
+        Отображает добавленный корабль на доске
+        """
+        self.ships.append(ship)
+        # Сравниваются список точек корабля и список списков точек доски. Возможно, можно оптимизировать
+        for i in range(len(ship.dots)):
+            for line in self.dots:
+                for dot in line:
+                    if dot == ship.dots[i]:
+                        dot.state = '\N{Black Circle}'
+
+    def contour(self):
+        """ Возвращает список точек вокруг корабля (на этих точках не может располагаться другой корабль) """
+        pass
+
+    def shot(self, dot):
+        message = ''
+
+        if dot.state == 'П':
+            message = 'В эту точку уже стреляли'
+        else:
+            for ship in self.ships:
+
+                if dot in ship.dots:
+                    dot.state = '\N{Circle with Horizontal Bar}'
+                    message = 'Попадание'
+                    break
+                else:
+                    dot.state = 'П'
+                    message = 'Промах'
+        print(message)
 
     def out(self, dot):
         if dot in self.dots:
@@ -56,11 +92,39 @@ class Board:
                 print(element.state, end=' | ') if k != len(line) - 1 else print(element.state, end='')
             print()
 
+        print('-' * 25)
+
+
+class Game:
+    def __init__(self, board):
+        self.board = board
+
+    def random_board(self):
+        pass
+
 
 # print('\N{Black Circle}') # корабль
 # print('\N{Circle with Horizontal Bar}') # подбитый корабль
 
-# dot1 = Dot(1, 1)
-# ship1 = Ship(1, dot1, dot1, 1)
+# Тест - создание доски, 3 разных кораблей и вывод
 board1 = Board([[Dot(x + 1, y + 1) for x in range(6)] for y in range(6)])
+ship1 = Ship([Dot(3, 3)], 1)
+ship2 = Ship([Dot(x + 1, 1) for x in range(2)], 2)
+ship3 = Ship([Dot(5, y + 2) for y in range(3)], 3)
 board1.print_board()
+
+# Тест - добавление кораблей на доску
+board1.add_ship(ship1)
+board1.add_ship(ship2)
+board1.add_ship(ship3)
+board1.print_board()
+
+# Тест - метод shot
+board1.shot(board1.dots[0][0])
+board1.print_board()
+board1.shot(board1.dots[4][4])
+board1.print_board()
+board1.shot(board1.dots[4][4])
+board1.print_board()
+
+# print(board1.__dict__)
