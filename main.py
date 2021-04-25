@@ -46,19 +46,42 @@ class Ship:
         self.forward_dot = forward_dot
         self.length = length
         self.hp = hp
-        self.direction = randint(1, 2)
+        self.direction = randint(1, 4)
         self.dots = [forward_dot] if dots is None else dots
 
-    def get_dots(self):
-        pass
+    def build(self):
+        """
+         Корабль создается от одной точки - forward_dot
+         Этот метод достраивает корабль в зависимости от direction и length
+         """
+        for i in range(self.length - 1):
+            if self.direction == 1:
+                self.dots.append(Dot(self.forward_dot.x + (i + 1), self.forward_dot.y))
+            elif self.direction == 2:
+                self.dots.append(Dot(self.forward_dot.x - (i + 1), self.forward_dot.y))
+            elif self.direction == 3:
+                self.dots.append(Dot(self.forward_dot.x, self.forward_dot.y - (i + 1)))
+            else:
+                self.dots.append(Dot(self.forward_dot.x, self.forward_dot.y + (i + 1)))
+        # print(f'direction: {self.direction}')
+        # for dot in self.dots:
+        #     print(dot)
 
-    # def get_near_dots(self):
-    #     """ Возвращает список точек вокруг корабля """
-    #     for ship_dot in self.dots:
-    #         ship_dot.get_near_dots()
-    #         for near_dot in ship_dot.near_dots:
-    #             if near_dot not in self.near_dots:
-    #                 self.near_dots.append(near_dot)
+    def get_dots(self):
+        return self.dots
+
+    def get_near_dots(self):
+        """ Возвращает список точек вокруг корабля
+            Также сюда попадают точки самих кораблей, если состоят из 2 или 3 клеток
+            Если корабль одноклеточный, то его точка не попадает в этот список
+            """
+
+        for ship_dot in self.dots:
+            ship_dot.get_near_dots()
+            for near_dot in ship_dot.near_dots:
+                if near_dot not in self.near_dots:
+                    self.near_dots.append(near_dot)
+        return self.near_dots
 
 
 class Board:
@@ -99,10 +122,12 @@ class Board:
                     message = 'Промах'
         print(message)
 
-    def out(self, dot):
-        if dot in self.dots:
-            return False
-        return True
+    def in_board(self, dot):
+        """ Определяет, находится ли точка в диапазоне доски"""
+        for line in self.dots:
+            if dot in line:
+                return True
+        return False
 
     def print_board(self):
         """ Выводит поле для игры на консоль """
@@ -127,26 +152,114 @@ class Game:
     #     self.board = board
 
     def generate_random_board(self):
+
         random_board = Board([[Dot(x + 1, y + 1) for x in range(6)] for y in range(6)])
+        forbidden_dots = []
 
-        for i in range(4):
-            ship1 = Ship([Dot(randint(1, 6), randint(1, 6))], 1, 1)
-            random_board.add_ship(ship1)
+        # count = 0       # Считает итерации в цикле создания одноклеточных кораблей
+        # flag = False    # Говорит о том, что счетчик перешел за 100
 
-        # ship2_1 = Ship([Dot(x + 1, 1) for x in range(2)], 2, 2)
-        # ship2_2 = Ship([Dot(x + 1, 1) for x in range(2)], 2, 2)
+        while True:
+            # Создание корабля из 3 клеток
+            while True:
+                ship3 = Ship(Dot(randint(1, 6), randint(1, 6)), 3, 3)
+                ship3.near_dots = []
+                ship3.build()
+                ship3.get_near_dots()
 
-        # ship3 = Ship([Dot(5, y + 2) for y in range(3)], 3)
-        # random_board.print_board()
+                print('ship3 построен с точками:')
+                for dot in ship3.dots:
+                    print(dot)
 
-        # random_board.add_ship(ship2_1)
-        # random_board.add_ship(ship2_2)
-        # random_board.add_ship(ship3)
-        # random_board.print_board()
+                add = True
+                delete = False
+                for dot in ship3.dots:
+                    if not random_board.in_board(dot):
+                        add = False
+                        delete = True
+                if delete:
+                    del ship3
+                    print('ship3 удален')
+                if add:
+                    random_board.add_ship(ship3)
+                    forbidden_dots.extend(ship3.near_dots)
+                    print(f'forbidden: {len(forbidden_dots)}')
+                    break
+
+            # Создание кораблей из 2 клеток
+            for i in range(2):
+                while True:
+                    # count += 1
+                    # if count > 100:
+                    #     flag = True
+                    #     break
+                    ship2 = Ship(Dot(randint(1, 6), randint(1, 6)), 2, 2)
+                    ship2.near_dots = []
+                    ship2.build()
+                    ship2.get_near_dots()
+
+                    print(f'ship2 построен с точками:')
+                    for dot in ship2.dots:
+                        print(dot)
+
+                    add = True
+                    delete = False
+                    for dot in ship2.dots:
+                        if not random_board.in_board(dot) or dot in forbidden_dots:
+                            add = False
+                            delete = True
+                    if delete:
+                        del ship2
+                        print('ship2 удален')
+                    if add:
+                        random_board.add_ship(ship2)
+                        forbidden_dots.extend(ship2.near_dots)
+                        print(f'forbidden: {len(forbidden_dots)}')
+                        break
+
+            # Создание кораблей из 1 клетки
+            for i in range(4):
+                while True:
+                    # count += 1
+                    # if count > 100:
+                    #     flag = True
+                    #     break
+                    ship1 = Ship(Dot(randint(1, 6), randint(1, 6)), 1, 1)
+                    ship1.near_dots = []
+                    ship1.build()
+                    ship1.get_near_dots()
+
+                    print('ship1 построен с точкой:', ship1.forward_dot)
+                    add = True
+                    delete = False
+                    if ship1.forward_dot in forbidden_dots:
+                        add = False
+                        delete = True
+                    if delete:
+                        del ship1
+                        print('ship1 удален')
+                    if add:
+                        random_board.add_ship(ship1)
+                        forbidden_dots.extend(ship1.near_dots)
+                        # Если корабль одноклеточный, то он не попадает в список near_dots
+                        forbidden_dots.append(ship1.forward_dot)
+                        print(f'forbidden: {len(forbidden_dots)}')
+                        break
+
+            random_board.print_board()
+
+            # if flag:
+            #     forbidden_dots = []
+            #     continue
+            # else:
+            #     break
+
+            break
 
 
 game = Game()
 game.generate_random_board()
+
 
 # # Тест - создание списка ближайших точек для точки
 # dot1 = Dot(0, 0)
