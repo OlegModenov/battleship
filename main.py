@@ -49,6 +49,9 @@ class Ship:
         self.direction = randint(1, 4)
         self.dots = [forward_dot] if dots is None else dots
 
+    def __str__(self):
+        return f"Ship with forward dot: {self.forward_dot}, length: {self.length}"
+
     def build(self):
         """
          Корабль создается от одной точки - forward_dot
@@ -104,6 +107,19 @@ class Board:
                     if dot == ship_dot:
                         dot.state = '\N{Black Circle}'
 
+    def delete_ship(self, ship):
+        """
+        Удаляет объект класса Ship из списка Board.ships
+        Удаляет отображение корабля на доске
+        """
+        self.ships.remove(ship)
+        # Сравниваются список точек корабля и список списков точек доски. Возможно, можно оптимизировать
+        for ship_dot in ship.dots:
+            for line in self.dots:
+                for dot in line:
+                    if dot == ship_dot:
+                        dot.state = ' '
+
     def shot(self, dot):
         """ Меняет состояние точки в случае попадания """
         message = ''
@@ -156,8 +172,8 @@ class Game:
         random_board = Board([[Dot(x + 1, y + 1) for x in range(6)] for y in range(6)])
         forbidden_dots = []
 
-        # count = 0       # Считает итерации в цикле создания одноклеточных кораблей
-        # flag = False    # Говорит о том, что счетчик перешел за 100
+        count = 0  # Считает итерации в цикле создания одноклеточных кораблей
+        flag = False  # Говорит о том, что счетчик перешел за 100
 
         while True:
             # Создание корабля из 3 клеток
@@ -220,10 +236,10 @@ class Game:
             # Создание кораблей из 1 клетки
             for i in range(4):
                 while True:
-                    # count += 1
-                    # if count > 100:
-                    #     flag = True
-                    #     break
+                    count += 1
+                    if count > 1000:
+                        flag = True
+                        break
                     ship1 = Ship(Dot(randint(1, 6), randint(1, 6)), 1, 1)
                     ship1.near_dots = []
                     ship1.build()
@@ -248,18 +264,23 @@ class Game:
 
             random_board.print_board()
 
-            # if flag:
-            #     forbidden_dots = []
-            #     continue
-            # else:
-            #     break
-
-            break
+            if flag:
+                forbidden_dots = []
+                count = 0
+                flag = False
+                # Не понимаю, почему список не очищается сразу, а удаляет только корабли одного вида
+                # Поэтому пришлось добавить while
+                while random_board.ships:
+                    for ship in random_board.ships:
+                        random_board.delete_ship(ship)
+                random_board.print_board()
+                continue
+            else:
+                break
 
 
 game = Game()
 game.generate_random_board()
-
 
 # # Тест - создание списка ближайших точек для точки
 # dot1 = Dot(0, 0)
