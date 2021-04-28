@@ -1,4 +1,5 @@
 from random import randint
+from time import sleep
 
 
 # class BoardOutException(Exception):
@@ -208,7 +209,21 @@ class User(Player):
         return 'User'
 
     def ask(self):
-        return Dot(int(input("Введите 'x' точки: ")), int(input("Введите 'y' точки: ")))
+        while True:
+            try:
+                inp = input(f'Введите слитно x и y клетки: ')
+                if len(inp) != 2:
+                    print('Введите 2 числа!')
+                    continue
+                else:
+                    x = int(inp[0])
+                    y = int(inp[1])
+                if 1 <= x <= 6 and 1 <= y <= 6:
+                    return Dot(x, y)
+                else:
+                    print('Неправильный диапазон - нужно вводить числа от 1 до 6')
+            except ValueError:
+                print('Нужно вводить числа!')
 
 
 class Game:
@@ -313,12 +328,14 @@ class Game:
         while True:
             self.user.move()
             self.ai_board.print_board()
+            sleep(2)
             if not self.ai_board.ships:
                 print('Поздравляем, вы победили!')
                 break
 
             self.ai.move()
             self.user_board.print_board()
+            sleep(2)
             if not self.user_board.ships:
                 print('Победил компьютер')
                 break
