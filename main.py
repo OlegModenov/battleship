@@ -2,14 +2,6 @@ from random import randint
 from time import sleep
 
 
-# class BoardOutException(Exception):
-#     def __init__(self, message):
-#         self.message = message
-#
-#     def __str__(self):
-#         return f'BoardOutException, {self.message}'
-
-
 class Dot:
     near_dots = []
 
@@ -236,6 +228,13 @@ class Game:
 
     @staticmethod
     def generate_random_board():
+        def build_ship(length, hp):
+            new_ship = Ship(Dot(randint(1, 6), randint(1, 6)), length, hp)
+            new_ship.near_dots = []
+            new_ship.build()
+            new_ship.get_near_dots()
+            return new_ship
+
         random_board = Board([[Dot(x + 1, y + 1) for x in range(6)] for y in range(6)])
         forbidden_dots = []  # Точки, на которых нельзя размещать новый корабль
         count = 0  # Считает итерации в цикле создания одноклеточных кораблей
@@ -244,10 +243,7 @@ class Game:
         while True:
             # Создание корабля из 3 клеток
             while True:
-                ship3 = Ship(Dot(randint(1, 6), randint(1, 6)), 3, 3)
-                ship3.near_dots = []
-                ship3.build()
-                ship3.get_near_dots()
+                ship3 = build_ship(3, 3)
 
                 add = True
                 delete = False
@@ -265,10 +261,7 @@ class Game:
             # Создание кораблей из 2 клеток
             for i in range(2):
                 while True:
-                    ship2 = Ship(Dot(randint(1, 6), randint(1, 6)), 2, 2)
-                    ship2.near_dots = []
-                    ship2.build()
-                    ship2.get_near_dots()
+                    ship2 = build_ship(2, 2)
 
                     add = True
                     delete = False
@@ -290,10 +283,7 @@ class Game:
                     if count > 1000:
                         flag = True
                         break
-                    ship1 = Ship(Dot(randint(1, 6), randint(1, 6)), 1, 1)
-                    ship1.near_dots = []
-                    ship1.build()
-                    ship1.get_near_dots()
+                    ship1 = build_ship(1, 1)
 
                     add = True
                     delete = False
